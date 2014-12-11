@@ -40,23 +40,31 @@ public class MarkdownTable {
 			doc.setRootElement(root); // 将根源素加入Document对象
 			
 			Element line = new Element("line");
-			line.setText("| 源文档标识 | 原始表达式 | QIDAM表达式 |");
+						
+/*
+			line.setText("| 类型 | 目标 | 说明 | 如何使用 | 特性 |");
 			Element line1 = new Element("line");
-			line1.setText("| ----- | ----- | ------ |");
+			line1.setText("| ----- | ----- | ----- | ------ | ------ |");*/
+			
+									
+			line.setText("| 工作流 | 阶段 | 任务 | 活动 | 子活动 | 参与角色  | Alerts/Reminders | 	Order sets | 	InfoButtons	 | Data display	 | Documentation templates");
+			Element line1 = new Element("line");
+			line1.setText(" | ------ | ----- | ----- | ----- | ------ | ------ | ----- | ----- | ----- | ------ | ------ |");
 
 			root.addContent(line);
+			root.addContent(line1);
 
 			// 引入excel中的数据
 
 			List<Element> elementList = this
-					.readTableFromExcel("example.xls");
+					.readTableFromExcel("Reference-Taxonomy-of-Clinical-Workflows.xls");
 			for (int i = 1; i < elementList.size(); i++) {
 				root.addContent(elementList.get(i));
 			}
 
 			XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat()); // 使XML文件分段
 			outputter.output(doc, new FileWriter(new File(
-					"example.md"))); // 将doc对象写入test.xml。当然，也可以将doc写入其他类型的输出流。
+					"workflow-patient.md"))); // 将doc对象写入test.xml。当然，也可以将doc写入其他类型的输出流。
 		} catch (Exception e) {
 			System.out.println(e);
 		}
@@ -88,26 +96,77 @@ public class MarkdownTable {
 			w = Workbook.getWorkbook(inputWorkbook, settings);
 
 			// Get the first sheet
-			Sheet sheet = w.getSheet(0);
+			Sheet sheet = w.getSheet(4);
 			Element e = null;
-			for (int i =1 ; i < sheet.getRows(); i++) {
+			for (int i =0 ; i < sheet.getRows(); i++) {
 				Cell cell = sheet.getCell(0, i);
-				String sourceDocumentID = cell.getContents();
+				String workflow = cell.getContents();
+				
 				Cell cell2 = sheet.getCell(1, i);
-				String sourceExpression = cell2.getContents();
+				String stage = cell2.getContents();
+				stage=stage.replaceAll("[\\t\\n\\r]", "");//将内容区域的回车换行去除 
 
 				Cell cell3 = sheet.getCell(2, i);
-				String QIDAMExpression = cell3.getContents();
+				String task = cell3.getContents();
+				task=task.replaceAll("[\\t\\n\\r]", "");//将内容区域的回车换行去除 
 
-				e = this.writePatternForDataElementRatio(sourceDocumentID,
-						sourceExpression, QIDAMExpression);
 
+				Cell cell4 = sheet.getCell(3, i);
+				String action = cell4.getContents();
+
+				Cell cell5 = sheet.getCell(4, i);
+				String subaction = cell5.getContents();
+				subaction=subaction.replaceAll("[\\t\\n\\r]", "");//将内容区域的回车换行去除 
+				
+				Cell cell6= sheet.getCell(5, i);
+				String roles = cell6.getContents();
+				
+				Cell cell7 = sheet.getCell(6, i);
+				String alerts = cell7.getContents();
+
+				Cell cell8 = sheet.getCell(7, i);
+				String ordersets = cell8.getContents();
+				
+
+				Cell cell9 = sheet.getCell(8, i);
+				String infobutton = cell9.getContents();
+
+				Cell cell10 = sheet.getCell(9, i);
+				String datadisplay = cell10.getContents();
+
+				Cell cell11 = sheet.getCell(10, i);
+				String documentationtemplate = cell11.getContents();
+				
+//				e = this.writePatternForDataElementRatio(sourceDocumentID,	sourceExpression, QIDAMExpression);
+		//		e = this.writePatternForCDSType(type,target, description, how, feature);
+				e =  this.writePatternForCDSInworkFLowPatient(workflow, stage, task, action, subaction, roles, alerts, ordersets, infobutton, datadisplay, documentationtemplate);
 				elementList.add(e);
 			}
 		} catch (BiffException e) {
 			e.printStackTrace();
 		}
 		return elementList;
+	}
+	private Element writePatternForCDSInworkFLowPatient(String workflow,	String stage, String task,
+			String action,String subaction, String roles,
+			String alerts, String ordersets,
+			String infobutton,String datadisplay,String documentationtemplate) throws IOException {
+
+		Element line = new Element("line");
+		line.setText("| "+workflow+"| "+stage+" | "+task+" | "+action+" |"+subaction+" |"+"| "+roles+"| "+alerts+" | "+ordersets+" | "+infobutton+" |"+datadisplay+" |"+" |"+documentationtemplate+" |");
+
+		return line;
+
+	}
+	private Element writePatternForCDSType(String type,
+			String target, String description,
+			String how,String feature) throws IOException {
+
+		Element line = new Element("line");
+		line.setText("| "+type+"| "+target+" | "+description+" | "+description+" |"+feature+" |");
+
+		return line;
+
 	}
 
 	private Element writePatternForDataElementRatio(
